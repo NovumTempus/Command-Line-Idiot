@@ -187,6 +187,20 @@ struct {
         return outp;
     }
 
+    double tradexponent(std::vector<double> inpnums) {
+        
+        double outp = inpnums[0];
+        double intermediate = inpnums[inpnums.size() - 2];
+
+        for (int x = inpnums.size() - 1; x > 1; --x) {
+            intermediate = pow(intermediate, inpnums[x]);
+        }
+
+        outp = pow(outp, intermediate);
+
+        return outp;
+    }
+
 } maethfunc;
 
 void clear(std::string clear_option) {
