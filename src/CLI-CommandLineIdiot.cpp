@@ -145,9 +145,9 @@ struct {
 
     double multiply(std::vector<double> inpnums) {
         
-        double outp = 0.0;
+        double outp = inpnums[0];
 
-        for (int x = 0; x < inpnums.size(); x++) {
+        for (int x = 1; x < inpnums.size(); x++) {
             outp *= inpnums[x];
         }
 
@@ -156,9 +156,9 @@ struct {
 
     double subtract(std::vector<double> inpnums) {
         
-        double outp = 0.0;
+        double outp = inpnums[0];
 
-        for (int x = 0; x < inpnums.size(); x++) {
+        for (int x = 1; x < inpnums.size(); x++) {
             outp -= inpnums[x];
         }
 
@@ -167,9 +167,9 @@ struct {
 
     double divide(std::vector<double> inpnums) {
         
-        double outp = 0.0;
+        double outp = inpnums[0];
 
-        for (int x = 0; x < inpnums.size(); x++) {
+        for (int x = 1; x < inpnums.size(); x++) {
             outp /= inpnums[x];
         }
 
