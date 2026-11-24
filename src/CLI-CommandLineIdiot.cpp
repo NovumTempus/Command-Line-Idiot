@@ -2,18 +2,20 @@
 
 #include <iostream>
 #include <string>
-#include <list>
 #include <vector>
 #include <chrono>
 #include <thread>
 #include <cctype>
 #include <fstream>
 #include <filesystem>
+#include <cmath>
 
 /*
 Light Blue: #5BCEFA (RGB: 91, 206, 250)
 Light Pink: #F5A9B8 (RGB: 245, 169, 184)
 White: #FFFFFF (RGB: 255, 255, 255) ⁠
+Light Pink: #F5A9B8 (RGB: 245, 169, 184)
+Light Blue: #5BCEFA (RGB: 91, 206, 250)
 */
 
 #ifdef _WIN32
@@ -130,7 +132,7 @@ struct {
         return outptlistwd;
     }
 
-    void add(std::vector<double> inpnums) {
+    double add(std::vector<double> inpnums) {
 
         double outp = 0.0;
 
@@ -138,11 +140,51 @@ struct {
             outp += inpnums[x];
         }
 
-        std::cout << outp;
+        return outp;
     }
 
-    void multiply(std::vector<double> inpnums) {
+    double multiply(std::vector<double> inpnums) {
         
+        double outp = 0.0;
+
+        for (int x = 0; x < inpnums.size(); x++) {
+            outp *= inpnums[x];
+        }
+
+        return outp;
+    }
+
+    double subtract(std::vector<double> inpnums) {
+        
+        double outp = 0.0;
+
+        for (int x = 0; x < inpnums.size(); x++) {
+            outp -= inpnums[x];
+        }
+
+        return outp;
+    }
+
+    double divide(std::vector<double> inpnums) {
+        
+        double outp = 0.0;
+
+        for (int x = 0; x < inpnums.size(); x++) {
+            outp /= inpnums[x];
+        }
+
+        return outp;
+    }
+
+    double exponent(std::vector<double> inpnums) {
+        
+        double outp = inpnums[0];
+
+        for (int x = 1; x < inpnums.size(); x++) {
+            outp = pow(outp, inpnums[x]);
+        }
+
+        return outp;
     }
 
 } maethfunc;
