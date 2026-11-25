@@ -9,14 +9,8 @@
 #include <fstream>
 #include <filesystem>
 #include <cmath>
-
-/*
-Light Blue: #5BCEFA (RGB: 91, 206, 250)
-Light Pink: #F5A9B8 (RGB: 245, 169, 184)
-White: #FFFFFF (RGB: 255, 255, 255) ⁠
-Light Pink: #F5A9B8 (RGB: 245, 169, 184)
-Light Blue: #5BCEFA (RGB: 91, 206, 250)
-*/
+#include <array>
+#include <algorithm>
 
 #ifdef _WIN32
     #include <windows.h>
@@ -25,6 +19,10 @@ Light Blue: #5BCEFA (RGB: 91, 206, 250)
 #elif __linux__
     #include <unistd.h>
 #endif
+
+/*
+This is in no way an idiot proof program, it is for use by people who kind of know what they are doing, and seeing as this is the Command Line Idiot you should not expect the behaviour you want to have
+*/
 
 namespace fs = std::filesystem;
 
@@ -66,6 +64,11 @@ int g_cmdcount = 0;
 int g_whycount = 0;
 bool g_whycountup = true;
 int g_ciscount = 0;
+std::string g_trigmode = "grad"; //Default mode for trigonometry
+
+double pi = 4.0 * std::atan(1.0);
+
+std::array<double, 256> maeth_storreg{};
 
 std::vector<std::string> split(const std::string& s) { //Function def. I guess.
 
@@ -119,20 +122,39 @@ std::vector<std::string> split(const std::string& s) { //Function def. I guess.
 
 };
 
-struct {
+namespace maethfunc{ //maethfunc is not implemented yet, I do not include exceptions nor error handling yet
 
-    std::vector<double> listwd(std::vector<std::string> inpvector) {
+    std::array<std::string, 10> numbers = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+
+    std::vector<double> inp2d(std::vector<std::string> inpvector) {
 
         std::vector<double> outptlistwd;
+        std::string tempstr;
+        int tempint1;
+        int maethreg;
+        std::string firstchar;
 
         for (int x = 2; x < inpvector.size(); x++) { //Command syntax
-            outptlistwd.push_back(std::stod(inpvector[x])); //No error handling yet.
+            
+            firstchar = inpvector[x][0];
+
+            if (std::find(numbers.cbegin(), numbers.cend(), firstchar) != numbers.cend()) {
+                outptlistwd.push_back(std::stod(inpvector[x])); //No error handling yet.
+            }
+
+            else if (firstchar == "r" || firstchar == "R") {
+
+                tempint1 = inpvector[x].length() - 2;
+                maethreg = std::stoi(inpvector[x].substr(1, tempint1));
+                outptlistwd.push_back(maeth_storreg[maethreg]);
+
+            }
         }
 
         return outptlistwd;
     }
 
-    double add(std::vector<double> inpnums) {
+    double add(std::vector<double> inpnums) { //All of the following assume the correct command syntax is ensured by the writer of the code.
 
         double outp = 0.0;
 
@@ -170,13 +192,17 @@ struct {
         double outp = inpnums[0];
 
         for (int x = 1; x < inpnums.size(); x++) {
+
+            if (inpnums[x] == 0) {
+                return 0.000000000000001; //For the funsies
+            }
             outp /= inpnums[x];
         }
 
         return outp;
     }
 
-    double exponent(std::vector<double> inpnums) {
+    double lr_exponent(std::vector<double> inpnums) {
         
         double outp = inpnums[0];
 
@@ -187,13 +213,13 @@ struct {
         return outp;
     }
 
-    double tradexponent(std::vector<double> inpnums) {
+    double trad_rl_exponent(std::vector<double> inpnums) {
         
         double outp = inpnums[0];
-        double intermediate = inpnums[inpnums.size() - 2];
+        double intermediate = inpnums[inpnums.size() - 1];
 
-        for (int x = inpnums.size() - 1; x > 1; --x) {
-            intermediate = pow(intermediate, inpnums[x]);
+        for (int x = inpnums.size() - 2; x > 0; --x) {
+            intermediate = pow(inpnums[x], intermediate);
         }
 
         outp = pow(outp, intermediate);
@@ -201,7 +227,27 @@ struct {
         return outp;
     }
 
-} maethfunc;
+    void trigmode(std::string mode) {
+
+        if (mode == "grad" || mode == "gradian" || mode == "gon" || mode == "grade") {
+            g_trigmode = "grad";
+        }
+
+        else if (mode == "rad" || mode == "radian") {
+            g_trigmode = "rad";
+        }
+        
+        else if (mode == "deg" || mode == "degrees") {
+            g_trigmode = "deg";
+        }
+
+        else {
+            g_trigmode = "wrong"; //Do not let them know.
+        }
+
+    }
+
+};
 
 void clear(std::string clear_option) {
 
@@ -222,7 +268,7 @@ void clear(std::string clear_option) {
         std::cout << "\033[3J\033c";
     }
 
-}
+};
 
 void why(std::string why_input) {
 
@@ -251,7 +297,7 @@ void why(std::string why_input) {
 
     std::cout << "\n\n";
 
-}
+};
 
 void echos() {
 
@@ -276,7 +322,7 @@ void echos() {
     std::this_thread::sleep_for(std::chrono::seconds(2));
     std::cout << "\n\nBOO\n\n";
 
-}
+};
 
 void help() {
 
@@ -286,7 +332,7 @@ void help() {
     std::cout << "clear - clears the terminal, optionally use 'sbb' or 'nuke' appended to it\n\n";
     std::cout << "echo - echo string\n\n        Modes: -c, -f\n\n        Correct syntax: echo (-c c/-f) <filename | only for -f> \"message\"\n\n";
 
-}
+};
 
 void echo(std::string mode, std::string msg) {
     
@@ -308,7 +354,7 @@ void echo(std::string mode, std::string msg) {
 
     }
 
-}
+};
 
 void cvar(std::string choice) {
 
@@ -355,9 +401,9 @@ void cvar(std::string choice) {
 
     std::cout << "\n\n";
 
-}
+};
 
-void setvar(std::string choice, std::string contents) {
+void setvar(std::string choice, std::string contents) { //not implemented yet
 
     if (choice == "whycount") {
         
@@ -383,7 +429,7 @@ void setvar(std::string choice, std::string contents) {
         
     }
 
-}
+};
 
 void check_cmd(std::string input) {
 
@@ -490,7 +536,7 @@ void check_cmd(std::string input) {
     else if (cmd == "notcis") {
         std::cout << "\n" << g_cmdcount << "\n\nOk.\n\n";
     }
-}
+};
 
 int main(void) {
 
@@ -511,3 +557,12 @@ int main(void) {
         }
     }
 }
+
+
+/*
+Light Blue: #5BCEFA (RGB: 91, 206, 250)
+Light Pink: #F5A9B8 (RGB: 245, 169, 184)
+White: #FFFFFF (RGB: 255, 255, 255) ⁠
+Light Pink: #F5A9B8 (RGB: 245, 169, 184)
+Light Blue: #5BCEFA (RGB: 91, 206, 250)
+*/
