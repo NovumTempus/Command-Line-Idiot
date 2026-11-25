@@ -1,5 +1,3 @@
-
-
 #include <iostream>
 #include <string>
 #include <vector>
@@ -12,17 +10,54 @@
 #include <array>
 #include <algorithm>
 
-#ifdef _WIN32
-    #include <windows.h>
-#elif __APPLE__
-    #include <mach-o/dyld.h>
-#elif __linux__
-    #include <unistd.h>
-#endif
-
 /*
 This is in no way an idiot proof program, it is for use by people who kind of know what they are doing, and seeing as this is the Command Line Idiot you should not expect the behaviour you want to have
 */
+
+#ifdef _WIN32
+
+    #include <windows.h>
+
+    long long g_st_sb = GetTickCount64();
+
+#elif __APPLE__
+
+    #include <mach-o/dyld.h>
+    #include <mach/mach_time.h>
+    #include <cstdint>
+
+    long long g_st_sb = [] {
+
+        mach_timebase_info_data_t info{};
+        mach_timebase_info(&info);
+
+        uint64_t ticks = mach_continuous_time();
+
+        return static_cast<long long>(static_cast<long double>(ticks) * info.numer / info.denom / 1'000'000
+
+        );
+    }();
+
+#elif __linux__
+
+    #include <unistd.h>
+    #include <time.h>
+
+    long long g_st_sb = [] {
+
+        timespec ts{};
+        clock_gettime(CLOCK_BOOTTIME, &ts);
+        return ts.tv_sec * 1000LL + ts.tv_nsec / 1'000'000;
+
+    }();
+
+#endif
+
+long long g_startuptime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+
+unsigned int g_uns_seed = static_cast<unsigned int>(g_st_sb) * static_cast<unsigned int>(g_startuptime);
+
+int g_seed = g_uns_seed;
 
 namespace fs = std::filesystem;
 
@@ -64,7 +99,7 @@ int g_cmdcount = 0;
 int g_whycount = 0;
 bool g_whycountup = true;
 int g_ciscount = 0;
-std::string g_trigmode = "grad"; //Default mode for trigonometry
+std::string g_trigmode = "rad"; //Default mode for trigonometry
 
 double pi = 4.0 * std::atan(1.0);
 
@@ -245,6 +280,24 @@ namespace maethfunc{ //maethfunc is not implemented yet, I do not include except
             g_trigmode = "wrong"; //Do not let them know.
         }
 
+    }
+
+    namespace trig{
+
+        double sine(std::vector<double> inp) { //3 arguments are taken, angle, cathetus, anything to provide access to another mode, arguments outside of that fuck it up, severely
+            
+            double outp = std::sin(inp[0]);
+
+            if (inp.size() == 2) {
+                outp *= inp[1];
+            }
+
+            else if (inp.size() == 3) {
+                outp = inp[1] / outp;
+            }
+
+            return outp;
+        }
     }
 
 };
